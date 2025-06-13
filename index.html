@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINAL PROJECT :: TECH QUIZ 2.0 ::</title>
+    <style>
+        :root {
+            --primary-color: #00f6ff;
+            --secondary-color: #ff00f6;
+            --background-color: #010409;
+            --text-color: #cdd9e5;
+            --hud-color: rgba(0, 246, 255, 0.5);
+            --font-display: 'Arial Black', Arial, sans-serif;
+            --font-body: 'Courier New', monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            display: grid;
+            place-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: var(--font-body);
+            cursor: crosshair;
+        }
+
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        #loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .glitch-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 10vw, 6rem);
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            animation: flicker 3s infinite alternate;
+            font-weight: 900;
+        }
+        
+        .glitch-title::before, .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background-color);
+            overflow: hidden;
+        }
+        
+        .glitch-title::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--secondary-color);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch-title::after {
+            left: -2px;
+            text-shadow: 2px 0 #00ff00;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        
+        #start-button {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            padding: 15px 30px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px 0 var(--primary-color), 0 0 10px 0 var(--primary-color);
+            margin-top: 40px;
+            font-weight: bold;
+        }
+        #start-button:hover {
+            background: var(--hud-color);
+            color: var(--background-color);
+            box-shadow: inset 0 0 20px 0 var(--primary-color), 0 0 30px 0 var(--primary-color);
+        }
+
+        .presentation-container {
+            width: 95vw;
+            height: 95vh;
+            max-width: 1400px;
+            max-height: 900px;
+            position: relative;
+            z-index: 1;
+            display: none;
+        }
+
+        .presentation-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1px, transparent 1px, transparent 3px);
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.98);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, visibility 0.5s;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            transition-delay: 0s;
+        }
+
+        .slide-content {
+            width: 90%;
+            height: 85%;
+            padding: 4% 6%;
+            background: radial-gradient(circle, rgba(1, 4, 9, 0.4) 0%, rgba(1, 4, 9, 0.8) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--hud-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 246, 255, 0.15);
+            position: relative;
+        }
+        
+        .hud-corners::before, .hud-corners::after,
+        .hud-corners > div::before, .hud-corners > div::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-style: solid;
+            border-color: var(--primary-color);
+            animation: flicker-border 4s infinite linear;
+            z-index: 2;
+        }
+        .hud-corners::before { top: 15px; left: 15px; border-width: 2px 0 0 2px; }
+        .hud-corners::after { top: 15px; right: 15px; border-width: 2px 2px 0 0; }
+        .hud-corners > div::before { bottom: 15px; left: 15px; border-width: 0 0 2px 2px; }
+        .hud-corners > div::after { bottom: 15px; right: 15px; border-width: 0 2px 2px 0; }
+
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--hud-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .slide-number {
+            font-family: var(--font-display);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        h2, h3 { 
+            font-family: var(--font-display); 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            margin: 0;
+            font-weight: 900;
+        }
+        h2 { 
+            font-size: clamp(2rem, 5vw, 3.5rem); 
+            color: var(--primary-color); 
+            text-shadow: 0 0 5px var(--primary-color); 
+        }
+        h3 { 
+            font-size: 1.8rem; 
+            color: var(--primary-color); 
+            margin: 20px 0 10px; 
+            font-weight: bold;
+        }
+        
+        p, li { 
+            font-size: clamp(1rem, 1.8vw, 1.2rem); 
+            line-height: 1.8; 
+            max-width: 90%;
+        }
+        ul { 
+            list-style: none; 
+            padding-left: 0; 
+        }
+        li::before { 
+            content: '»'; 
+            color: var(--primary-color); 
+            margin-right: 15px; 
+            font-weight: bold; 
+        }
+
+        pre { 
+            font-family: var(--font-body); 
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid var(--hud-color); 
+            padding: 20px; 
+            font-size: 0.9em; 
+            white-space: pre-wrap; 
+            box-shadow: inset 0 0 10px rgba(0, 246, 255, 0.2); 
+            border-radius: 8px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        .nav-button {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            padding: 10px 25px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .nav-button:hover, .nav-button:focus { 
+            background: var(--hud-color); 
+            color: var(--background-color); 
+            box-shadow: 0 0 20px 0 var(--primary-color); 
+            outline: none;
+        }
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .typewriter span { 
+            opacity: 0; 
+            animation: fadeInChar 0.05s forwards; 
+        }
+
+        @keyframes flicker { 
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { 
+                text-shadow: 0 0 4px var(--primary-color), 0 0 11px var(--primary-color), 0 0 19px var(--secondary-color), 0 0 40px var(--secondary-color); 
+                opacity: 1; 
+            } 
+            20%, 24%, 55% { 
+                text-shadow: none; 
+                opacity: 0.8; 
+            } 
+        }
+        @keyframes flicker-border { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes scanline { to { background-position: 0 50px; } }
+        @keyframes fadeInChar { to { opacity: 1; } }
+        @keyframes glitch-anim-1 { 
+            0% { clip-path: inset(45% 0 50% 0); } 
+            25% { clip-path: inset(10% 0 85% 0); } 
+            50% { clip-path: inset(60% 0 30% 0); } 
+            75% { clip-path: inset(30% 0 65% 0); } 
+            100% { clip-path: inset(80% 0 5% 0); } 
+        }
+        @keyframes glitch-anim-2 { 
+            0% { clip-path: inset(80% 0 15% 0); } 
+            25% { clip-path: inset(20% 0 75% 0); } 
+            50% { clip-path: inset(55% 0 33% 0); } 
+            75% { clip-path: inset(5% 0 90% 0); } 
+            100% { clip-path: inset(70% 0 20% 0); } 
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .slide-content {
+                padding: 3% 4%;
+            }
+            h2 {
+                font-size: clamp(1.5rem, 8vw, 2.5rem);
+            }
+            p, li {
+                font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            }
+            pre {
+                font-size: 0.8em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+
+    <div id="loader">
+        <h1 class="glitch-title" data-text="Tech Quiz 2.0">Tech Quiz 2.0</h1>
+        <button id="start-button">SYSTEM INITIALISIEREN</button>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Folie 1: Titelfolie -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div></div>
+                <div style="text-align: center;">
+                    <h2 data-text="Tech Quiz 2.0" style="font-size: clamp(3rem, 12vw, 6rem); border: none; text-shadow: 0 0 15px var(--primary-color); margin-bottom: 30px;">Tech Quiz 2.0</h2>
+                    <h3 data-text="Konzeption & Planung des Abschlussprojekts" style="font-size: clamp(1.2rem, 4vw, 2rem); margin-bottom: 40px;">Konzeption & Planung des Abschlussprojekts</h3>
+                    <p data-text="Ein Cyberpunk-Meisterwerk von: Pascal Laub, Rahimdad F. Safi, Ronny Stieber, Sebastian Riede-Zwätz, Jonas Cicek" style="font-size: clamp(0.9rem, 2vw, 1.2rem); max-width: 100%;">Ein Cyberpunk-Meisterwerk von:<br>Pascal Laub, Rahimdad F. Safi, Ronny Stieber,<br>Sebastian Riede-Zwätz, Jonas Cicek</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folie 2: Agenda -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div></div>
+                <div class="slide-header">
+                    <h2>AGENDA</h2>
+                    <div class="slide-number">2 / 7</div>
+                </div>
+                <ul>
+                    <li data-text="Die Vision: Problem & Idee">Die Vision: Problem & Idee</li>
+                    <li data-text="Die Architektur: Das technische Fundament">Die Architektur: Das technische Fundament</li>
+                    <li data-text="Der Tech-Stack: Unsere Werkzeuge">Der Tech-Stack: Unsere Werkzeuge</li>
+                    <li data-text="Die Pipeline: CI/CD & Testing">Die Pipeline: CI/CD & Testing</li>
+                    <li data-text="Die Sicherheit: Konzepte & Umsetzung">Die Sicherheit: Konzepte & Umsetzung</li>
+                    <li data-text="Die Reflexion: Herausforderungen & Siege">Die Reflexion: Herausforderungen & Siege</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Folie 3: Problem & Idee -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div></div>
+                <div class="slide-header">
+                    <h2>DIE VISION</h2>
+                    <div class="slide-number">3 / 7</div>
+                </div>
+                <h3 data-text="Problemstellung:">Problemstellung:</h3>
+                <p data-text="Wissen veraltet. Zertifizierungen sind hart. Lernen ist oft passiv und uninspiriert.">Wissen veraltet. Zertifizierungen sind hart. Lernen ist oft passiv und uninspiriert.</p>
+                <h3 data-text="Unsere Lösung: Tech Quiz 2.0">Unsere Lösung: Tech Quiz 2.0</h3>
+                <p data-text="Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt. Mit realistischem Prüfungsmodus, Gamification und Tools, die über das reine Abfragen hinausgehen.">Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt. Mit realistischem Prüfungsmodus, Gamification und Tools, die über das reine Abfragen hinausgehen.</p>
+            </div>
+        </div>
+
+        <!-- Folie 4: Architektur -->
+        <div class="slide">
+             <div class="slide-content hud-corners">
+                <div></div>
+                <div class="slide-header">
+                    <h2>ARCHITEKTUR</h2>
+                    <div class="slide-number">4 / 7</div>
+                </div>
+                <p data-text="Entkoppelt. Skalierbar. Zukunftsicher.">Entkoppelt. Skalierbar. Zukunftsicher.</p>
+                <pre data-text="graph TD
+User[Browser: React SPA] -- HTTPS --> Ingress[AKS Ingress Controller]
+Ingress --> Backend[Node.js API in Pod]
+Backend -- CRUD --> DB(CosmosDB / DynamoDB)
+Backend -- Files --> Storage(Azure Blob Storage)
+DNS --> Route53 --> Azure IP">graph TD
+User[Browser: React SPA] -- HTTPS --> Ingress[AKS Ingress Controller]
+Ingress --> Backend[Node.js API in Pod]
+Backend -- CRUD --> DB(CosmosDB / DynamoDB)
+Backend -- Files --> Storage(Azure Blob Storage)
+DNS --> Route53 --> Azure IP</pre>
+                <p data-text="Eine robuste Monorepo-Architektur mit Azure Kubernetes Service (AKS), dockerisierten Services und zentralem DNS-Routing über AWS Route53 – skalierbar, entkoppelt, zukunftsicher." style="font-size: 1rem;">Eine robuste Monorepo-Architektur mit Azure Kubernetes Service (AKS), dockerisierten Services und zentralem DNS-Routing über AWS Route53 – skalierbar, entkoppelt, zukunftsicher.</p>
+            </div>
+        </div>
+
+        <!-- Folie 5: Tech-Stack -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div></div>
+                <div class="slide-header">
+                    <h2>TECH-STACK</h2>
+                    <div class="slide-number">5 / 7</div>
+                </div>
+                <ul>
+                    <li data-text="Frontend: React 19, Vite, Zustand, Tailwind CSS"><strong>Frontend:</strong> React 19, Vite, Zustand, Tailwind CSS</li>
+                    <li data-text="Backend: Node.js, Express.js, JWT, bcryptjs"><strong>Backend:</strong> Node.js, Express.js, JWT, bcryptjs</li>
+                    <li data-text="Cloud-Infrastruktur: Azure AKS, Blob Storage, Cosmos DB (optional: DynamoDB), Route53 DNS"><strong>Cloud-Infrastruktur:</strong> Azure AKS, Blob Storage, Cosmos DB (optional: DynamoDB), Route53 DNS</li>
+                    <li data-text="DevOps-Arsenal: GitHub Actions, Docker, Playwright, Jest"><strong>DevOps-Arsenal:</strong> GitHub Actions, Docker, Playwright, Jest</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Folie 6: CI/CD & Testing -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div></div>
+                <div class="slide-header">
+                    <h2>CI/CD & TESTING</h2>
+                    <div class="slide-number">6 / 7</div>
+                </div>
+                <p data-text="Qualität ist kein Zufall, sie ist Code. Unsere Pipeline ist der Wächter.">Qualität ist kein Zufall, sie ist Code. Unsere Pipeline ist der Wächter.</p>
+                <pre data-text="Push -> GitHub Actions -> [Lint -> Unit-Tests -> Build -> E2E-Tests] -> Deploy">Push -> GitHub Actions -> [Lint -> Unit-Tests -> Build -> E2E-Tests] -> Deploy</pre>
+                <p data-text="Eine dreistufige Teststrategie (Unit, API, E2E) und Pre-Commit Hooks garantieren, dass nur erstklassiger Code die Produktion erreicht.">Eine dreistufige Teststrategie (Unit, API, E2E) und Pre-Commit Hooks garantieren, dass nur erstklassiger Code die Produktion erreicht.</p>
+                <p data-text="Der Deployment-Prozess pusht Docker-Images nach Azure Container Registry und automatisiert die Bereitstellung auf AKS mit GitHub Actions.">Der Deployment-Prozess pusht Docker-Images nach Azure Container Registry und automatisiert die Bereitstellung auf AKS mit GitHub Actions.</p>
+            </div>
+        </div>
+
+        <!-- Folie 7: Abschluss -->
+        <div class="slide">
+            <div class="slide-content hud-corners" style="text-align: center; justify-content: center;">
+                <div></div>
+                <h2 data-text="FRAGEN?" style="font-size: clamp(3rem, 12vw, 6rem); border: none; margin-bottom: 30px;">FRAGEN?</h2>
+                <p data-text="Vielen Dank." style="font-size: 1.5rem;">Vielen Dank.</p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-button" id="prevBtn">« Zurück</button>
+            <button class="nav-button" id="nextBtn">Weiter »</button>
+        </div>
+    </div>
+
+    <script>
+        // --- STARFIELD ANIMATION ---
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let animationId;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createStars() {
+            stars = [];
+            const numStars = Math.floor((canvas.width * canvas.height) / 8000);
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    speed: Math.random() * 0.5 + 0.1,
+                    opacity: Math.random() * 0.8 + 0.2,
+                    size: Math.random() * 2 + 0.5
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+                
+                ctx.fillStyle = `rgba(0, 246, 255, ${star.opacity})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+            
+            animationId = requestAnimationFrame(animateStars);
+        }
+
+        // --- PRESENTATION LOGIC ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const presentationContainer = document.querySelector('.presentation-container');
+        const navigation = document.querySelector('.navigation');
+        const loader = document.getElementById('loader');
+        const startButton = document.getElementById('start-button');
+        let typewritingTimeout;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === totalSlides - 1;
+
+            if (presentationContainer.style.display === 'block') {
+                 typewriterEffect();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function startPresentation() {
+            loader.classList.add('hidden');
+            setTimeout(() => {
+                loader.style.display = 'none';
+                presentationContainer.style.display = 'block';
+                navigation.style.display = 'flex';
+                showSlide(0);
+            }, 500);
+        }
+
+        function typewriterEffect() {
+            if (typewritingTimeout) clearTimeout(typewritingTimeout);
+            
+            const elements = document.querySelectorAll('.slide.active [data-text]');
+            elements.forEach((element) => {
+                const text = element.getAttribute('data-text');
+                element.innerHTML = '';
+                [...text].forEach((char, charIndex) => {
+                    const span = document.createElement('span');
+                    if (char === ' ') {
+                        span.innerHTML = ' ';
+                    } else {
+                        span.textContent = char;
+                    }
+                    span.style.animationDelay = `${charIndex * 0.02}s`;
+                    element.appendChild(span);
+                });
+            });
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', startPresentation);
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (loader.classList.contains('hidden')) {
+                switch(e.key) {
+                    case 'ArrowRight':
+                    case ' ':
+                        e.preventDefault();
+                        nextSlide();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        prevSlide();
+                        break;
+                    case 'Escape':
+                        // Return to loader
+                        presentationContainer.style.display = 'none';
+                        navigation.style.display = 'none';
+                        loader.style.display = 'flex';
+                        setTimeout(() => loader.classList.remove('hidden'), 10);
+                        currentSlide = 0;
+                        break;
+                }
+            }
+        });
+
+        // Initialize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            createStars();
+        });
+
+        // Start everything
+        resizeCanvas();
+        createStars();
+        animateStars();
+        showSlide(-1); // Start with no active slide to prevent initial animation
+    </script>
+</body>
+</html>
