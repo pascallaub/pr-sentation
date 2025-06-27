@@ -156,7 +156,7 @@
         .slide-content {
             width: 90%;
             height: 85%;
-            padding: 4% 6%;
+            padding: 3% 4%;
             background: radial-gradient(circle, rgba(1, 4, 9, 0.4) 0%, rgba(1, 4, 9, 0.8) 100%);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -164,7 +164,9 @@
             border-radius: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: 0 0 40px rgba(0, 246, 255, 0.15);
             position: relative;
         }
@@ -192,6 +194,7 @@
             border-bottom: 1px solid var(--hud-color);
             padding-bottom: 15px;
             margin-bottom: 30px;
+            width: 100%;
         }
 
         .slide-number {
@@ -215,35 +218,54 @@
             text-shadow: 0 0 5px var(--primary-color); 
         }
         h3 { 
-            font-size: 1.8rem; 
+            font-size: clamp(1.4rem, 3vw, 1.8rem); 
             color: var(--primary-color); 
             margin: 20px 0 10px; 
             font-weight: bold;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
         }
         
         p, li { 
             font-size: clamp(1rem, 1.8vw, 1.2rem); 
             line-height: 1.8; 
-            max-width: 90%;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
+            hyphens: manual;
+            text-align: left;
         }
         ul { 
             list-style: none; 
             padding-left: 0; 
+            width: 100%;
+            margin: 0;
         }
         li::before { 
             content: '»'; 
             color: var(--primary-color); 
-            margin-right: 15px; 
+            margin-right: 10px; 
             font-weight: bold; 
+        }
+        li {
+            margin-bottom: 15px;
+            padding-right: 10px;
         }
 
         pre { 
             font-family: var(--font-body); 
             background: rgba(0,0,0,0.4); 
             border: 1px solid var(--hud-color); 
-            padding: 20px; 
-            font-size: 0.9em; 
+            padding: 15px; 
+            font-size: clamp(0.7em, 1.2vw, 0.9em); 
             white-space: pre-wrap; 
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
+            overflow-x: auto;
+            max-width: 100%;
             box-shadow: inset 0 0 10px rgba(0, 246, 255, 0.2); 
             border-radius: 8px;
         }
@@ -287,48 +309,56 @@
             animation: fadeInChar 0.05s forwards; 
         }
 
-        @keyframes flicker { 
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { 
-                text-shadow: 0 0 4px var(--primary-color), 0 0 11px var(--primary-color), 0 0 19px var(--secondary-color), 0 0 40px var(--secondary-color); 
-                opacity: 1; 
-            } 
-            20%, 24%, 55% { 
-                text-shadow: none; 
-                opacity: 0.8; 
-            } 
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
         }
+
+        @keyframes flicker { 0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 4px var(--primary-color), 0 0 11px var(--primary-color), 0 0 19px var(--secondary-color), 0 0 40px var(--secondary-color); opacity: 1; } 20%, 24%, 55% { text-shadow: none; opacity: 0.8; } }
         @keyframes flicker-border { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         @keyframes scanline { to { background-position: 0 50px; } }
         @keyframes fadeInChar { to { opacity: 1; } }
-        @keyframes glitch-anim-1 { 
-            0% { clip-path: inset(45% 0 50% 0); } 
-            25% { clip-path: inset(10% 0 85% 0); } 
-            50% { clip-path: inset(60% 0 30% 0); } 
-            75% { clip-path: inset(30% 0 65% 0); } 
-            100% { clip-path: inset(80% 0 5% 0); } 
-        }
-        @keyframes glitch-anim-2 { 
-            0% { clip-path: inset(80% 0 15% 0); } 
-            25% { clip-path: inset(20% 0 75% 0); } 
-            50% { clip-path: inset(55% 0 33% 0); } 
-            75% { clip-path: inset(5% 0 90% 0); } 
-            100% { clip-path: inset(70% 0 20% 0); } 
+        @keyframes glitch-anim-1 { 0% { clip-path: inset(45% 0 50% 0); } 25% { clip-path: inset(10% 0 85% 0); } 50% { clip-path: inset(60% 0 30% 0); } 75% { clip-path: inset(30% 0 65% 0); } 100% { clip-path: inset(80% 0 5% 0); } }
+        @keyframes glitch-anim-2 { 0% { clip-path: inset(80% 0 15% 0); } 25% { clip-path: inset(20% 0 75% 0); } 50% { clip-path: inset(55% 0 33% 0); } 75% { clip-path: inset(5% 0 90% 0); } 100% { clip-path: inset(70% 0 20% 0); } }
+
+        @media (max-width: 768px) {
+            .slide-content { 
+                padding: 2% 3%; 
+                width: 95%;
+                height: 90%;
+            }
+            h2 { font-size: clamp(1.5rem, 8vw, 2.5rem); }
+            p, li { font-size: clamp(0.9rem, 2.5vw, 1.1rem); }
+            pre { 
+                font-size: clamp(0.6em, 1vw, 0.8em); 
+                padding: 10px; 
+            }
+            .slide-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .slide-number {
+                align-self: flex-end;
+            }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
             .slide-content {
-                padding: 3% 4%;
+                padding: 1% 2%;
+                width: 98%;
+                height: 95%;
             }
-            h2 {
-                font-size: clamp(1.5rem, 8vw, 2.5rem);
-            }
-            p, li {
-                font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            }
-            pre {
-                font-size: 0.8em;
-                padding: 15px;
+            h2 { font-size: clamp(1.2rem, 6vw, 2rem); }
+            h3 { font-size: clamp(1rem, 4vw, 1.5rem); }
+            p, li { font-size: clamp(0.8rem, 2vw, 1rem); }
+            .nav-button {
+                font-size: 1rem;
+                padding: 8px 15px;
             }
         }
     </style>
@@ -345,111 +375,139 @@
         <!-- Folie 1: Titelfolie -->
         <div class="slide">
             <div class="slide-content hud-corners">
-                <div></div>
-                <div style="text-align: center;">
-                    <h2 data-text="Tech Quiz 2.0" style="font-size: clamp(3rem, 12vw, 6rem); border: none; text-shadow: 0 0 15px var(--primary-color); margin-bottom: 30px;">Tech Quiz 2.0</h2>
+                <div class="center-content">
+                    <h2 data-text="Tech Quiz 2.0" style="font-size: clamp(3rem, 12vw, 6rem); text-shadow: 0 0 15px var(--primary-color); margin-bottom: 30px;">Tech Quiz 2.0</h2>
                     <h3 data-text="Konzeption & Planung des Abschlussprojekts" style="font-size: clamp(1.2rem, 4vw, 2rem); margin-bottom: 40px;">Konzeption & Planung des Abschlussprojekts</h3>
-                    <p data-text="Ein Cyberpunk-Meisterwerk von: Pascal Laub, Sebastian Riede-Zwätz, Jonas Cicek" style="font-size: clamp(0.9rem, 2vw, 1.2rem); max-width: 100%;">Ein Cyberpunk-Meisterwerk von:<br>Pascal Laub, Rahimdad F. Safi, Ronny Stieber,<br>Sebastian Riede-Zwätz, Jonas Cicek</p>
+                    <p data-text="Ein Cyberpunk-Meisterwerk von: Pascal Laub, Sebastian Riede-Zwätz, Jonas Cicek" style="font-size: clamp(0.9rem, 2vw, 1.2rem);">Ein Cyberpunk-Meisterwerk von:<br>Pascal Laub, Rahimdad F. Safi, Ronny Stieber,<br>Sebastian Riede-Zwätz, Jonas Cicek</p>
                 </div>
             </div>
         </div>
 
-        <!-- Folie 2: Agenda -->
+        <!-- Folie 2: Der Hook (Problemstellung) -->
         <div class="slide">
             <div class="slide-content hud-corners">
-                <div></div>
                 <div class="slide-header">
-                    <h2>AGENDA</h2>
-                    <div class="slide-number">2 / 7</div>
+                    <h2>Das Problem</h2>
+                    <div class="slide-number">2 / 10</div>
                 </div>
-                <ul>
-                    <li data-text="Die Vision: Problem & Idee">Die Vision: Problem & Idee</li>
-                    <li data-text="Die Architektur: Das technische Fundament">Die Architektur: Das technische Fundament</li>
-                    <li data-text="Der Tech-Stack: Unsere Werkzeuge">Der Tech-Stack: Unsere Werkzeuge</li>
-                    <li data-text="Die Pipeline: CI/CD & Testing">Die Pipeline: CI/CD & Testing</li>
-                    <li data-text="Die Sicherheit: Konzepte & Umsetzung">Die Sicherheit: Konzepte & Umsetzung</li>
-                    <li data-text="Die Reflexion: Herausforderungen & Siege">Die Reflexion: Herausforderungen & Siege</li>
-                </ul>
+                <h3 data-text="Wissen veraltet schnell.">Wissen veraltet schnell.</h3>
+                <p data-text="Wir haben festgestellt, dass IT-Professionals ständig für Zertifizierungen lernen müssen. Bestehende Lernplattformen sind oft      passiv, uninspiriert und bereiten nicht auf den echten Prüfungsstress vor.">Wir haben festgestellt, dass IT-Professionals ständig für Zertifizierungen lernen müssen. Bestehende Lernplattformen sind oft passiv, uninspiriert und bereiten nicht auf den echten Prüfungsstress vor.</p>
             </div>
         </div>
 
-        <!-- Folie 3: Problem & Idee -->
+        <!-- Folie 3: Die Lösung -->
         <div class="slide">
             <div class="slide-content hud-corners">
-                <div></div>
                 <div class="slide-header">
-                    <h2>DIE VISION</h2>
-                    <div class="slide-number">3 / 7</div>
+                    <h2>Die Lösung</h2>
+                    <div class="slide-number">3 / 10</div>
                 </div>
-                <h3 data-text="Problemstellung:">Problemstellung:</h3>
-                <p data-text="Wissen veraltet. Zertifizierungen sind hart. Lernen ist oft passiv und uninspiriert.">Wissen veraltet. Zertifizierungen sind hart. Lernen ist oft passiv und uninspiriert.</p>
-                <h3 data-text="Unsere Lösung: Tech Quiz 2.0">Unsere Lösung: Tech Quiz 2.0</h3>
-                <p data-text="Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt. Mit realistischem Prüfungsmodus, Gamification und Tools, die über das reine Abfragen hinausgehen.">Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt. Mit realistischem Prüfungsmodus, Gamification und Tools, die über das reine Abfragen hinausgehen.</p>
+                <h3 data-text="Tech Quiz 2.0">Tech Quiz 2.0</h3>
+                <p data-text="Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt.      Wir lösen das Problem durch realistische Prüfungssimulationen, Gamification und interaktive        Lerntools.">Eine immersive Lernplattform, die Wissenstests in ein adrenalingeladenes Erlebnis verwandelt. Wir lösen das Problem durch realistische Prüfungssimulationen, Gamification und interaktive Lerntools.</p>
             </div>
         </div>
 
-        <!-- Folie 4: Architektur -->
+        <!-- Folie 4: Live-Demo -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div class="center-content">
+                    <h2 data-text="LIVE-DEMO" style="font-size: clamp(3rem, 12vw, 6rem);">LIVE-DEMO</h2>
+                    <p data-text="Jetzt zeigen wir euch, wie es funktioniert." style="font-size: 1.5rem;">Jetzt zeigen wir euch, wie es funktioniert.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folie 5: Architektur -->
         <div class="slide">
              <div class="slide-content hud-corners">
-                <div></div>
                 <div class="slide-header">
-                    <h2>ARCHITEKTUR</h2>
-                    <div class="slide-number">4 / 7</div>
+                    <h2>Architektur</h2>
+                    <div class="slide-number">5 / 10</div>
                 </div>
                 <p data-text="Entkoppelt. Skalierbar. Zukunftsicher.">Entkoppelt. Skalierbar. Zukunftsicher.</p>
-                <pre data-text="graph TD
-User[Browser: React SPA] -- HTTPS --> Ingress[AKS Ingress Controller]
-Ingress --> Backend[Node.js API in Pod]
-Backend -- CRUD --> DB(CosmosDB / DynamoDB)
-Backend -- Files --> Storage(Azure Blob Storage)
-DNS --> Route53 --> Azure IP">graph TD
-User[Browser: React SPA] -- HTTPS --> Ingress[AKS Ingress Controller]
-Ingress --> Backend[Node.js API in Pod]
-Backend -- CRUD --> DB(CosmosDB / DynamoDB)
-Backend -- Files --> Storage(Azure Blob Storage)
-DNS --> Route53 --> Azure IP</pre>
-                <p data-text="Eine robuste Monorepo-Architektur mit Azure Kubernetes Service (AKS), dockerisierten Services und zentralem DNS-Routing über AWS Route53 – skalierbar, entkoppelt, zukunftsicher." style="font-size: 1rem;">Eine robuste Monorepo-Architektur mit Azure Kubernetes Service (AKS), dockerisierten Services und zentralem DNS-Routing über AWS Route53 – skalierbar, entkoppelt, zukunftsicher.</p>
+                <pre data-text="Frontend: React SPA
+↓ HTTPS ↓  
+AKS Ingress Controller
+↓
+Node.js API in Pod
+↓ CRUD ↓        ↓ Files ↓
+CosmosDB     Azure Blob Storage">Frontend: React SPA
+↓ HTTPS ↓  
+AKS Ingress Controller
+↓
+Node.js API in Pod
+↓ CRUD ↓        ↓ Files ↓
+CosmosDB     Azure Blob Storage</pre>
             </div>
         </div>
 
-        <!-- Folie 5: Tech-Stack -->
+        <!-- Folie 6: Tech-Stack -->
         <div class="slide">
             <div class="slide-content hud-corners">
-                <div></div>
                 <div class="slide-header">
-                    <h2>TECH-STACK</h2>
-                    <div class="slide-number">5 / 7</div>
+                    <h2>Tech-Stack</h2>
+                    <div class="slide-number">6 / 10</div>
                 </div>
                 <ul>
                     <li data-text="Frontend: React 19, Vite, Zustand, Tailwind CSS"><strong>Frontend:</strong> React 19, Vite, Zustand, Tailwind CSS</li>
                     <li data-text="Backend: Node.js, Express.js, JWT, bcryptjs"><strong>Backend:</strong> Node.js, Express.js, JWT, bcryptjs</li>
-                    <li data-text="Cloud-Infrastruktur: Azure AKS, Blob Storage, Cosmos DB (optional: DynamoDB), Route53 DNS"><strong>Cloud-Infrastruktur:</strong> Azure AKS, Blob Storage, Cosmos DB (optional: DynamoDB), Route53 DNS</li>
-                    <li data-text="DevOps-Arsenal: GitHub Actions, Docker, Playwright, Jest"><strong>DevOps-Arsenal:</strong> GitHub Actions, Docker, Playwright, Jest</li>
+                    <li data-text="Cloud & Orchestrierung: Azure AKS, Azure Container Registry, Cosmos DB, Blob Storage"><strong>Cloud & Orchestrierung:</strong> Azure AKS, Azure Container Registry, Cosmos DB, Blob Storage</li>
+                    <li data-text="DevOps-Arsenal: GitHub Actions, Docker, Playwright, SonarCloud"><strong>DevOps-Arsenal:</strong> GitHub Actions, Docker, Playwright, SonarCloud</li>
                 </ul>
             </div>
         </div>
 
-        <!-- Folie 6: CI/CD & Testing -->
+        <!-- Folie 7: Besondere Herausforderung -->
         <div class="slide">
             <div class="slide-content hud-corners">
-                <div></div>
                 <div class="slide-header">
-                    <h2>CI/CD & TESTING</h2>
-                    <div class="slide-number">6 / 7</div>
+                    <h2>Besondere Herausforderung</h2>
+                    <div class="slide-number">7 / 10</div>
                 </div>
-                <p data-text="Qualität ist kein Zufall, sie ist Code. Unsere Pipeline ist der Wächter.">Qualität ist kein Zufall, sie ist Code. Unsere Pipeline ist der Wächter.</p>
-                <pre data-text="Push -> GitHub Actions -> [Lint -> Unit-Tests -> Build -> E2E-Tests] -> Deploy">Push -> GitHub Actions -> [Lint -> Unit-Tests -> Build -> E2E-Tests] -> Deploy</pre>
-                <p data-text="Eine dreistufige Teststrategie (Unit, API, E2E) und Pre-Commit Hooks garantieren, dass nur erstklassiger Code die Produktion erreicht.">Eine dreistufige Teststrategie (Unit, API, E2E) und Pre-Commit Hooks garantieren, dass nur erstklassiger Code die Produktion erreicht.</p>
-                <p data-text="Der Deployment-Prozess pusht Docker-Images nach Azure Container Registry und automatisiert die Bereitstellung auf AKS mit GitHub Actions.">Der Deployment-Prozess pusht Docker-Images nach Azure Container Registry und automatisiert die Bereitstellung auf AKS mit GitHub Actions.</p>
+                <h3 data-text="Robuste CI/CD-Pipeline">Robuste CI/CD-Pipeline</h3>
+                <p data-text="Die größte Hürde war die Erstellung einer stabilen CI-Pipeline mit Playwright. Timeouts und Race Conditions erforderten ein Refactoring hin zu           ereignisbasierten Tests.">Die größte Hürde war die Erstellung einer stabilen CI-Pipeline mit Playwright. Timeouts und Race Conditions erforderten ein Refactoring hin zu ereignisbasierten Tests.</p>
+                <pre data-text="await expect(page.locator('.Toastify__toast--success')).toBeVisible();">await expect(page.locator('.Toastify__toast--success')).toBeVisible();</pre>
+            </div>
+        </div>
+        
+        <!-- Folie 8: Herausforderungen & Learnings -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                <div class="slide-header">
+                    <h2>Learnings</h2>
+                    <div class="slide-number">8 / 10</div>
+                </div>
+                <ul>
+                    <li data-text="CI/CD ist entscheidend: Eine frühe und robuste Pipeline spart am Ende Tage an Debugging.">CI/CD ist entscheidend: Eine frühe und robuste Pipeline spart am Ende Tage an Debugging.</li>
+                    <li data-text="Secrets Management ist nicht trivial: Die Trennung von Dev- und Prod-Secrets ist kritisch.">Secrets Management ist nicht trivial: Die Trennung von Dev- und Prod-Secrets ist kritisch.</li>
+                    <li data-text="Refactoring ist keine Zeitverschwendung: Das Auslagern von dupliziertem                           Test-Code hat nicht nur SonarQube besänftigt, sondern auch die Tests stabiler gemacht.">Refactoring ist keine Zeitverschwendung: Das Auslagern von dupliziertem Test-Code hat nicht nur SonarQube besänftigt, sondern auch die Tests stabiler gemacht.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Folie 9: Zukunft & Ausblick -->
+        <div class="slide">
+            <div class="slide-content hud-corners">
+                 <div class="slide-header">
+                    <h2>Ausblick</h2>
+                    <div class="slide-number">9 / 10</div>
+                </div>
+                <h3 data-text="Nächste Schritte:">Nächste Schritte:</h3>
+                <ul>
+                    <li data-text="Community-Fragen: Benutzer können eigene Fragen einreichen und bewerten.">Community-Fragen: Benutzer können eigene Fragen einreichen und bewerten.</li>
+                    <li data-text="Infrastructure as Code: Vollständige Automatisierung der Azure-Infrastruktur mit Terraform.">Infrastructure as Code: Vollständige Automatisierung der Azure-Infrastruktur mit Terraform.</li>
+                    <li data-text="Erweiterte Dashboards: Detailliertere Analyse der persönlichen Leistung mit Grafana.">Erweiterte Dashboards: Detailliertere Analyse der persönlichen Leistung mit Grafana.</li>
+                </ul>
             </div>
         </div>
 
-        <!-- Folie 7: Abschluss -->
+        <!-- Folie 10: Abschlussfolie -->
         <div class="slide">
-            <div class="slide-content hud-corners" style="text-align: center; justify-content: center;">
-                <div></div>
-                <h2 data-text="FRAGEN?" style="font-size: clamp(3rem, 12vw, 6rem); border: none; margin-bottom: 30px;">FRAGEN?</h2>
-                <p data-text="Vielen Dank." style="font-size: 1.5rem;">Vielen Dank.</p>
+            <div class="slide-content hud-corners">
+                <div class="center-content">
+                    <h2 data-text="FRAGEN?" style="font-size: clamp(3rem, 12vw, 6rem);">FRAGEN?</h2>
+                    <p data-text="Vielen Dank. Link zum Repository: github.com/Techstarter-Quiz-2-0/quiz" style="font-size: 1.5rem;">Vielen Dank.<br>Link zum Repository: github.com/Techstarter-Quiz-2-0/quiz</p>
+                </div>
             </div>
         </div>
         
@@ -512,7 +570,6 @@ DNS --> Route53 --> Azure IP</pre>
         const navigation = document.querySelector('.navigation');
         const loader = document.getElementById('loader');
         const startButton = document.getElementById('start-button');
-        let typewritingTimeout;
 
         function showSlide(index) {
             slides.forEach((slide, i) => {
@@ -552,16 +609,17 @@ DNS --> Route53 --> Azure IP</pre>
         }
 
         function typewriterEffect() {
-            if (typewritingTimeout) clearTimeout(typewritingTimeout);
-            
-            const elements = document.querySelectorAll('.slide.active [data-text]');
+            const activeSlide = document.querySelector('.slide.active');
+            if (!activeSlide) return;
+
+            const elements = activeSlide.querySelectorAll('[data-text]');
             elements.forEach((element) => {
                 const text = element.getAttribute('data-text');
                 element.innerHTML = '';
                 [...text].forEach((char, charIndex) => {
                     const span = document.createElement('span');
                     if (char === ' ') {
-                        span.innerHTML = ' ';
+                        span.innerHTML = ' ';
                     } else {
                         span.textContent = char;
                     }
@@ -578,19 +636,20 @@ DNS --> Route53 --> Azure IP</pre>
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (loader.classList.contains('hidden')) {
+            if (presentationContainer.style.display === 'block') {
                 switch(e.key) {
                     case 'ArrowRight':
                     case ' ':
+                    case 'PageDown':
                         e.preventDefault();
                         nextSlide();
                         break;
                     case 'ArrowLeft':
+                    case 'PageUp':
                         e.preventDefault();
                         prevSlide();
                         break;
                     case 'Escape':
-                        // Return to loader
                         presentationContainer.style.display = 'none';
                         navigation.style.display = 'none';
                         loader.style.display = 'flex';
@@ -611,7 +670,7 @@ DNS --> Route53 --> Azure IP</pre>
         resizeCanvas();
         createStars();
         animateStars();
-        showSlide(-1); // Start with no active slide to prevent initial animation
+        showSlide(-1);
     </script>
 </body>
 </html>
